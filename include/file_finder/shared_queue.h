@@ -7,7 +7,7 @@ namespace file_finder {
 
 class SharedQueue {
 private:
-    std::queue<std::string> m_files_found;
+    std::queue<std::string> m_queue;
     std::mutex m_access_queue;
 
 public:

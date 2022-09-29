@@ -11,7 +11,8 @@ fi
 BUILD_DIR=${PROJECT_DIR}/build/${BUILD_TYPE}
 BIN_NAME="file_finder"
 
+# -DCMAKE_VERBOSE_MAKEFILE=TRUE
 mkdir -p ${BUILD_DIR}
 cmake -G "Unix Makefiles" -B ${BUILD_DIR} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DENABLE_TESTING=OFF
 cmake --build ${BUILD_DIR} --target ${BIN_NAME}
-${BUILD_DIR}/src/${BIN_NAME}
+#${BUILD_DIR}/src/${BIN_NAME}
