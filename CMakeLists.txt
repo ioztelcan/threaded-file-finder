@@ -9,7 +9,7 @@ project(
   HOMEPAGE_URL ""
   LANGUAGES CXX)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Werror -Wall -Wextra -pedantic")
 
 # Sanitizer flags
 set(ENABLE_SANITIZERS ON CACHE BOOL "Enable Sanitizers")

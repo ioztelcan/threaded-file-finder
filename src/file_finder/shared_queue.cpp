@@ -32,4 +32,5 @@ SharedQueue &get_queue_instance()
     static SharedQueue shared_queue;
     return shared_queue;
 }
+
 } // namespace file_finder

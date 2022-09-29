@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <atomic>
+#include <chrono>
 
 #include "file_finder/seeker.h"
 #include "file_finder/shared_queue.h"
@@ -25,12 +26,14 @@ int main(int argc, char * argv[])
     }
 
     ff::SharedQueue &shared_queue = ff::get_queue_instance();
-    std::cout << "Addr of sq: " << &shared_queue << "\n";
-    std::cout << "-------\n";
-
     std::string search_dir {argv[1]};
     const std::vector<std::string_view> args(argv + 2, argv + argc);
 
     ff::Seeker seeker{args};
     seeker.start_search(search_dir);
+
+    while (true) {
+        shared_queue.dump_queue();
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
 }
