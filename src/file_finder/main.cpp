@@ -5,11 +5,12 @@
 
 #include "file_finder/seeker.h"
 #include "file_finder/shared_queue.h"
+//#include "file_finder/commands.h"
 
 namespace ff = file_finder;
 
 constexpr int max_args_allowed = 100; //TODO: Maybe pick a less arbitrary number?
-std::atomic_flag exit_flag; // In C++20 this is initialized clearly to false.
+std::atomic_flag g_exit_flag; // In C++20 this is initialized clearly to false.
 
 int main(int argc, char *argv[])
 {
@@ -23,17 +24,16 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    std::string search_dir {argv[1]};
-    const std::vector<std::string_view> args(argv + 2, argv + argc);
+    const std::vector<std::string> args(argv + 2, argv + argc);
 
-    ff::Seeker seeker{args};
-    seeker.start_search(search_dir);
+    ff::Seeker seeker{args, argv[1]};
+    seeker.start_search();
 
     ff::SharedQueue &files_found = ff::get_queue_instance();
 
     auto periodic_dump = [&files_found]() {
         while (true) {
-            if (exit_flag.test()) {
+            if (g_exit_flag.test()) {
                 std::cout << "Periodic dump exiting...\n";
                 return;
             }
@@ -50,12 +50,12 @@ int main(int argc, char *argv[])
             std::cin.clear();
             std::cin >> user_input;
         } while ((user_input != "dump") && (user_input != "exit"));
-
+        
         if (user_input == "dump") {
             std::cout << "dumping...\n";
             files_found.dump_queue();
         } else {
-            exit_flag.test_and_set();
+            g_exit_flag.test_and_set();
             seeker.stop_search();
             periodic_dump_ft.get();
             std::cout << "Exiting program.\n";

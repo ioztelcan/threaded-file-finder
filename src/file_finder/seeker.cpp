@@ -8,20 +8,18 @@
 #include "file_finder/seeker.h"
 #include "file_finder/shared_queue.h"
 
-namespace fs = std::filesystem;
-
 namespace file_finder {
 
-
 // Constructors
-Seeker::Seeker(std::vector<std::string_view> substrings) : m_substrings{std::move(substrings)}
+Seeker::Seeker(std::vector<std::string> substrings, std::string search_dir) : m_substrings{std::move(substrings)},
+                                                                              m_search_dir{std::move(search_dir)}
 { }
 
 // Public
-void Seeker::start_search(const std::string &directory)
+void Seeker::start_search()
 {
     for (const auto &substring: m_substrings) {
-        m_workers.push_back(std::async(&Seeker::search, this, substring, directory));
+        m_workers.push_back(std::async(&Seeker::search, this, substring, m_search_dir));
     }
 }
 
@@ -34,12 +32,14 @@ void Seeker::stop_search()
 }
 
 // Private
-void Seeker::search(const std::string_view &substr, const std::string &directory)
+void Seeker::search(const std::string &substr, const std::string &directory)
 {
     if (m_stop_workers.test()) {
         std::cout << "Search halted...\n";
         return;
     }
+
+    namespace fs = std::filesystem;
     SharedQueue &shared_queue = get_queue_instance();
 
     try {
@@ -57,7 +57,7 @@ void Seeker::search(const std::string_view &substr, const std::string &directory
             return;
         }
         if (!dir_entry.is_directory()) {
-            if(std::string {dir_entry.path().filename() }.find(substr) != std::string::npos) {
+            if(std::string {dir_entry.path().filename()}.find(substr) != std::string::npos) {
                 shared_queue.push(std::string{dir_entry.path().filename()});
             }
         }
