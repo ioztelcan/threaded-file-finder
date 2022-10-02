@@ -42,14 +42,6 @@ void Seeker::search(const std::string &substr, const std::string &directory)
     namespace fs = std::filesystem;
     SharedQueue &shared_queue = get_queue_instance();
 
-    try {
-        fs::current_path(directory);
-    } catch (const std::exception &ex) {
-        std::cerr << "Exception caught: " << ex.what() << "\n";
-        // TODO: Better handling of these exit conditions.
-        return;
-    }
-
     for (const auto& dir_entry : fs::recursive_directory_iterator{directory})
     {
         if (m_stop_workers.test()) {
@@ -61,7 +53,7 @@ void Seeker::search(const std::string &substr, const std::string &directory)
                 shared_queue.push(std::string{dir_entry.path().filename()});
             }
         }
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        //std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
 
