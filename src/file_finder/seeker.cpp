@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <iostream>
 #include <mutex>
-
 #include <chrono>
 
 #include "file_finder/seeker.h"
@@ -35,25 +34,30 @@ void Seeker::stop_search()
 void Seeker::search(const std::string &substr, const std::string &directory)
 {
     if (m_stop_workers.test()) {
-        std::cout << "Search halted...\n";
+        std::cout << "Search halted for "<< substr << "\n";
         return;
     }
 
     namespace fs = std::filesystem;
+
     SharedQueue &shared_queue = get_queue_instance();
 
-    for (const auto& dir_entry : fs::recursive_directory_iterator{directory})
-    {
-        if (m_stop_workers.test()) {
-            std::cout << "Search halted...\n";
-            return;
-        }
-        if (!dir_entry.is_directory()) {
-            if(std::string {dir_entry.path().filename()}.find(substr) != std::string::npos) {
-                shared_queue.push(std::string{dir_entry.path().filename()});
+    try {
+        for (const auto& dir_entry : fs::recursive_directory_iterator{directory})
+        {
+            if (m_stop_workers.test()) {
+                std::cout << "Search halted for "<< substr << "\n";
+                return;
             }
+            if (!dir_entry.is_directory()) {
+                if (std::string{dir_entry.path().filename()}.find(substr) != std::string::npos) {
+                    shared_queue.push(std::string{dir_entry.path().filename()});
+                }
+            }
+            //std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        //std::this_thread::sleep_for(std::chrono::seconds(1));
+    } catch (const std::exception &ex) {
+        std::cerr << "Exception caught: " << ex.what() << "\n";
     }
 }
 

@@ -2,6 +2,7 @@
 #include <vector>
 #include <atomic>
 #include <chrono>
+#include <filesystem>
 
 #include "file_finder/command_runner.h"
 #include "file_finder/seeker.h"
@@ -9,13 +10,13 @@
 
 namespace ff = file_finder;
 
-constexpr long long periodic_dump_interval_ms = 200;
-constexpr int max_args_allowed = 100; //TODO: Maybe pick a less arbitrary number?
+constexpr auto periodic_dump_interval_ms = 200;
 std::atomic_flag g_exit_flag; // In C++20 this is initialized clearly to false.
 
 void register_commands(ff::CommandRunner &runner)
 {
     runner.register_command("dump", [](){
+        std::cout << "Dumping container contents...\n";
         ff::get_queue_instance().dump_queue();
     });
 
@@ -26,13 +27,20 @@ void register_commands(ff::CommandRunner &runner)
 
 int main(int argc, char *argv[])
 {
-    if (max_args_allowed < argc - 2) {
+    auto max_args_allowed = std::thread::hardware_concurrency();
+
+    if (argc < 3) {
+        std::cerr << "You need to provide a directory and at least one one substring to search. \n";
+        return EXIT_FAILURE;
+    }
+
+    if (max_args_allowed < static_cast<unsigned int>(argc) - 2) {
         std::cerr << "Too many substrings to search, please try with " << max_args_allowed << " arguments or less.\n";
         return EXIT_FAILURE;
     }
 
-    if (argc < 3) {
-        std::cerr << "You need to provide a directory and at least one one substring to search. \n";
+    if (!std::filesystem::exists(std::filesystem::path{argv[1]})) {
+        std::cerr << "Directory doesn't exist, please enter a valid directory. \n";
         return EXIT_FAILURE;
     }
 
@@ -40,7 +48,7 @@ int main(int argc, char *argv[])
     ff::CommandRunner runner;
     register_commands(runner);
 
-    // Initialize the queue through its get function once before new threads are created.
+    // Initialize the shared container through its get function once before new threads are created.
     ff::get_queue_instance();
 
     // Construct the file seeker with the list of substrings and target directory, then start the search.
