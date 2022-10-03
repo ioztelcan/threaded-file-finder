@@ -4,16 +4,16 @@
 
 namespace file_finder {
 
-//Public
+// Public functions
 void SharedQueue::push(const std::string &file)
 {
-    std::lock_guard<std::mutex> guard{m_access_queue};
+    std::lock_guard guard{m_access_queue};
     m_queue.push(file);
 }
 
 std::string SharedQueue::pop()
 {
-    std::lock_guard<std::mutex> guard{m_access_queue};
+    std::lock_guard guard{m_access_queue};
     auto file = m_queue.front();
     m_queue.pop();
     return file;
@@ -21,14 +21,14 @@ std::string SharedQueue::pop()
 
 void SharedQueue::dump_queue()
 {
-    std::lock_guard<std::mutex> guard{m_access_queue};
+    std::lock_guard guard{m_access_queue};
     while (!m_queue.empty()) {
         std::cout << m_queue.front() << "\n";
         m_queue.pop();
     }
 }
 
-// Other
+// Non-member functions
 SharedQueue &get_queue_instance()
 {
     static SharedQueue shared_queue;

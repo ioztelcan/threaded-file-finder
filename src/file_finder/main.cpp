@@ -10,6 +10,7 @@
 
 namespace ff = file_finder;
 
+// The interval can be increased to help testing the concurrent behaviour.
 constexpr auto periodic_dump_interval_ms = 200;
 std::atomic_flag g_exit_flag; // In C++20 this is initialized clearly to false.
 
@@ -27,6 +28,8 @@ void register_commands(ff::CommandRunner &runner)
 
 int main(int argc, char *argv[])
 {
+    // Set the max substrings allowed to concurrent thread limitation of the underlying
+    // hardware. It can be set to something higher depending on program need.
     auto max_args_allowed = std::thread::hardware_concurrency();
 
     if (argc < 3) {
