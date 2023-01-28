@@ -21,10 +21,15 @@ std::string SharedQueue::pop()
 
 void SharedQueue::dump_queue()
 {
-    std::lock_guard guard{m_access_queue};
-    while (!m_queue.empty()) {
-        std::cout << m_queue.front() << "\n";
-        m_queue.pop();
+    // Swap first with an empty one, so lock is held much less.
+    std::queue<std::string> dump{};
+    {
+        std::lock_guard guard{m_access_queue};
+        std::swap(m_queue, dump);
+    }
+    while (!dump.empty()) {
+        std::cout << dump.front() << "\n";
+        dump.pop();
     }
 }
 

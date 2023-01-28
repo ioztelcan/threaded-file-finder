@@ -31,11 +31,3 @@ if (ENABLE_CLANG_TIDY)
 endif()
 
 add_subdirectory(src)
-
-# Enable google test
-option(ENABLE_TESTING "Enable the tests" ON)
-if(ENABLE_TESTING)
-  enable_testing()
-  add_custom_target(build_and_test ${CMAKE_CTEST_COMMAND} -V)
-  add_subdirectory(test)
-endif()

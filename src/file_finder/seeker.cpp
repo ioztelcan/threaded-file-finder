@@ -20,6 +20,7 @@ void Seeker::search(const std::string &substr, const std::string &directory)
     auto &g_shared_queue = get_queue_instance();
     namespace fs = std::filesystem;
 
+    //TODO: Doing a BFS over dirs rather than recursive search can enable using threads for each dir, speeding up the search and not blowing the stack.
     try {
         // Iterate over directories and files recursively.
         for (const auto& dir_entry : fs::recursive_directory_iterator{directory})
